@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wise - Country of Residence Change</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600..800&family=Inter:wght@400;600;700&display=swap">
+<style>
+/* Layout: one reading column; the prototype sits beside its controls. Wise-inspired greens, single theme. */
+:root{
+  --forest:#163300; --lime:#9FE870; --mint:#E2F6D5; --paper:#F6F8F3; --card:#FDFEFB;
+  --ink:#12200A; --muted:#4A5A40; --line:#C9D6BE; --green:#2F5711; --warn:#FFF1C9; --warnline:#E4C461; --bad:#FDECE8; --badline:#E0A196; --badink:#7A1F10;
+  --display:'Inter Tight',Arial,sans-serif; --body:'Inter',Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+a{color:var(--green)}
+:focus-visible{outline:3px solid var(--forest);outline-offset:2px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+header{background:var(--forest);color:var(--mint);padding:52px 0 40px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--lime);margin:0 0 12px}
+h1,h2,h3{font-family:var(--display);color:var(--forest);margin:0;text-wrap:balance}
+header h1{color:#fff;font-size:clamp(38px,7vw,64px);line-height:1;font-weight:800;letter-spacing:-.015em}
+header p{max-width:60ch;margin:16px 0 0;font-size:19px}
+.tag{display:inline-block;margin-top:20px;font-size:13px;border:1px solid #3F5F22;border-radius:999px;padding:4px 12px}
+nav.jump{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+nav.jump .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:8px;padding-bottom:8px}
+nav.jump a{white-space:nowrap;text-decoration:none;font-size:14px;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:999px}
+nav.jump a:hover{background:var(--mint);color:var(--forest)}
+section{padding:48px 0 12px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{font-size:clamp(26px,4vw,36px);line-height:1.1;font-weight:800;letter-spacing:-.01em;margin-bottom:12px}
+h3{font-size:20px;font-weight:700;line-height:1.2}
+.lede{max-width:64ch;margin:0 0 18px;font-size:18px}
+.small{font-size:14px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.card p{margin:4px 0 0;font-size:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 32px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 32px}
+table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:0 0 28px}
+th{font-family:var(--display);text-align:left;background:var(--forest);color:var(--mint);padding:10px 16px;font-size:15px}
+td{padding:11px 16px;border-top:1px solid var(--line);font-size:16px;vertical-align:top}
+td:first-child{font-weight:700;color:var(--green);white-space:nowrap;width:1%}
+.tablewrap{overflow-x:auto}
+ul.tight{margin:6px 0 0;padding-left:20px}
+ul.tight li{margin:3px 0}
+.pill{display:inline-block;font-size:12px;font-weight:700;background:var(--forest);color:var(--lime);border-radius:999px;padding:2px 10px}
+.pill.alt{background:var(--mint);color:var(--forest)}
+
+/* journey */
+.seg{display:inline-flex;border:1px solid var(--forest);border-radius:999px;overflow:hidden;margin:0 0 18px}
+.seg button{font:inherit;font-weight:700;font-size:15px;border:0;background:var(--card);color:var(--forest);padding:9px 20px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--forest);color:var(--lime)}
+.lane{margin:0 0 16px}
+.lane h3{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.flow li{animation:pop .35s both;animation-delay:calc(var(--i) * 70ms)}
+.flow .step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:600;font-size:15px;max-width:210px;line-height:1.3}
+.flow .step.gap{background:var(--warn);border-color:var(--warnline)}
+.flow .step.ok{background:var(--mint);border-color:var(--lime)}
+.flow .arrow{color:var(--green);font-weight:700}
+.flow .gaptag{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--badink);margin-bottom:2px}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 20px}
+.road .card h3{margin:8px 0 4px}
+
+/* prototype */
+.proto{display:grid;grid-template-columns:338px 1fr;gap:32px;align-items:start;margin:18px 0 32px}
+.ph{width:322px;height:610px;border:8px solid var(--forest);border-radius:38px;background:var(--paper);display:flex;flex-direction:column;overflow:hidden;font-size:14px;line-height:1.4}
+.ph-head{display:flex;align-items:center;gap:4px;min-height:52px;padding:0 8px;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:700;font-size:18px;color:var(--forest)}
+.ph-head span{padding-left:8px}
+.ph-back{width:40px;height:40px;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.ph-body{flex:1;overflow-y:auto;padding:18px 18px 20px;display:flex;flex-direction:column;gap:12px}
+.ph h4{font-family:var(--display);font-weight:800;font-size:24px;line-height:1.1;margin:2px 0 0;color:var(--forest)}
+.ph .step{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em}
+.ph label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:3px}
+.ph input,.ph textarea{width:100%;font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;color:var(--ink)}
+.ph input:disabled,.ph .locked{background:#ECEFE8;color:var(--muted)}
+.ph .locked{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.ph .banner{display:block;width:100%;text-align:left;font:inherit;font-size:12px;color:var(--muted);background:none;border:0;padding:0;margin:-4px 0 0;cursor:pointer}
+.ph .banner u{font-weight:700;color:var(--green)}
+.ph .box{background:var(--mint);border:1px solid var(--lime);border-radius:14px;padding:12px 14px}
+.ph .box.warn{background:var(--warn);border-color:var(--warnline)}
+.ph .box.bad{background:var(--bad);border-color:var(--badline)}
+.ph .box b{display:block;font-family:var(--display);font-size:16px;color:var(--forest);margin-bottom:2px}
+.ph .box.bad b{color:var(--badink)}
+.ph ul,.ph ol{margin:0;padding-left:20px}
+.ph li{margin:2px 0}
+.ph .file{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.ph .file .small{font-size:12px}
+.bar{height:10px;border-radius:5px;background:#DDE6D3;overflow:hidden}
+.bar div{height:100%;width:0;background:var(--green)}
+.ph .grow{flex:1}
+.ph .b1,.ph .b2,.ph .b3{font:inherit;font-weight:700;font-size:16px;border-radius:26px;height:48px;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;width:100%}
+.ph .b1{background:var(--lime);color:var(--forest);border:0}
+.ph .b2{background:var(--mint);color:var(--forest);border:1px solid var(--lime)}
+.ph .b3{background:none;border:0;color:var(--green);text-decoration:underline;height:40px;font-size:15px}
+.ph .tl{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
+.ph .tl li{display:flex;gap:10px;align-items:center}
+.ph .tl i{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--line);background:var(--card)}
+.ph .tl i.d{background:var(--forest);border-color:var(--forest)}
+.ph .tl i.n{background:var(--lime);border-color:var(--forest)}
+.ph .money{background:var(--forest);color:var(--mint);border-radius:18px;padding:16px}
+.ph .money big{display:block;font-family:var(--display);font-weight:800;font-size:34px;color:#fff;line-height:1.1}
+.ph .chg{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lime);padding:6px 0}
+.ph .chg b{display:inline;font-size:14px}
+.screenlabel{margin:10px 0 0;font-size:14px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.ctl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.ctl fieldset{border:0;padding:0;margin:0 0 14px}
+.ctl legend{font-family:var(--display);font-weight:700;font-size:16px;color:var(--forest);padding:0;margin-bottom:6px}
+.ctl label{display:flex;gap:8px;align-items:center;font-size:15px;padding:3px 0;cursor:pointer}
+.ctl input{accent-color:var(--forest);width:18px;height:18px}
+.ctl .actions{display:flex;gap:10px;flex-wrap:wrap}
+.ctl button{font:inherit;font-weight:700;font-size:15px;border-radius:999px;padding:9px 18px;cursor:pointer;border:1px solid var(--forest);background:var(--card);color:var(--forest)}
+.ctl button.primary{background:var(--lime)}
+.ctl button:disabled{opacity:.45;cursor:default}
+
+
+/* problem visuals */
+.statement{font-family:var(--body);font-weight:400;font-size:clamp(20px,2.9vw,28px);line-height:1.3;color:var(--forest);max-width:42ch;margin:6px 0 24px}
+.sub{margin:8px 0 12px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 30px}
+.glance .tiles{margin:24px 0 0}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-height:96px}
+.tile .k,.fact .k{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
+.tile b,.fact b{font-family:var(--display);font-size:19px;line-height:1.2;color:var(--forest)}
+.tile.bad{background:var(--warn);border-color:var(--warnline)}
+.tile.bad .k{color:var(--badink)}
+.quotes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 30px}
+.quote{margin:0;background:var(--forest);color:var(--mint);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.quote .tagq{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--lime);color:var(--forest);border-radius:999px;padding:3px 10px}
+.quote blockquote{margin:0;font-family:var(--display);font-weight:700;font-size:21px;line-height:1.2;color:#fff}
+.quote figcaption{font-size:13px;color:#B9D3A4}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 30px}
+.fact{display:block;text-decoration:none;background:var(--mint);border:1px solid var(--lime);border-radius:16px;padding:14px 16px}
+.fact:hover{background:#D5EFC3}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease;transition-delay:calc(var(--d,0) * 90ms)}
+.reveal.in{opacity:1;transform:none}
+.tile,.quote,.fact{transition:opacity .5s ease,transform .5s ease,box-shadow .2s;transition-delay:calc(var(--d,0) * 90ms),calc(var(--d,0) * 90ms),0s}
+.tile.in:hover,.quote.in:hover,.fact.in:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(22,51,0,.12)}
+@media (max-width:860px){.tiles,.facts,.quotes{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* hero phone */
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
+.heroart{position:relative;display:flex;justify-content:center;padding:8px 0}
+.hphone{width:236px;height:400px;background:var(--paper);border:7px solid #0B1F00;border-radius:34px;box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 0 2px #3F5F22;transform:rotate(4deg);overflow:hidden;color:var(--ink);font-family:var(--body)}
+.hbar{font-family:var(--display);font-weight:700;font-size:15px;color:var(--forest);padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.hbody{padding:14px 14px;display:flex;flex-direction:column;gap:12px}
+.hlabel{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:-6px}
+.hfield,.hlink,.hmoney{position:relative}
+.hfield{height:38px;border:1px solid var(--line);border-radius:10px;background:#ECEFE8;font-size:14px}
+.hfield span{position:absolute;inset:0;display:flex;align-items:center;padding:0 12px}
+.hfield .a{color:var(--muted)}
+.hfield .a::after{content:"";width:10px;height:12px;margin-left:auto;border:2px solid var(--muted);border-radius:3px}
+.hfield .b{color:var(--forest);font-weight:700;background:var(--mint);border-radius:9px}
+.hlink{height:34px;font-size:11.5px;color:var(--muted)}
+.hlink span{position:absolute;inset:0}
+.hlink u{color:var(--green);font-weight:700}
+.hlink .b{color:var(--forest);font-weight:600}
+.hmoney{height:92px;border-radius:16px;background:var(--forest);color:var(--mint)}
+.hmoney span{position:absolute;inset:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:center}
+.hmoney small{font-size:11px;color:#B9D3A4}
+.hmoney big{font-family:var(--display);font-weight:800;font-size:32px;color:#fff;line-height:1.15}
+.hsteps{display:flex;gap:6px}
+.hsteps i{flex:1;height:6px;border-radius:3px;background:#DDE6D3}
+.hsteps i:nth-child(1){background:var(--forest)}
+.hsteps i:nth-child(2){animation:s2 9s infinite}
+.hsteps i:nth-child(3){animation:s3 9s infinite}
+.hchip{position:absolute;right:6%;top:14%;background:var(--lime);color:var(--forest);font-family:var(--display);font-weight:800;font-size:15px;border-radius:999px;padding:6px 14px;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:chip 9s infinite}
+.hfield .a,.hlink .a,.hmoney .a{animation:fa 9s infinite}
+.hfield .b,.hlink .b,.hmoney .b{animation:fb 9s infinite}
+@keyframes fa{0%,40%{opacity:1}50%,92%{opacity:0}100%{opacity:1}}
+@keyframes fb{0%,40%{opacity:0}50%,92%{opacity:1}100%{opacity:0}}
+@keyframes s2{0%,25%{background:#DDE6D3}35%,100%{background:var(--forest)}}
+@keyframes s3{0%,45%{background:#DDE6D3}55%,92%{background:var(--lime)}100%{background:#DDE6D3}}
+@keyframes chip{0%,38%{opacity:0;transform:translateY(8px) scale(.9)}46%,92%{opacity:1;transform:none}100%{opacity:0}}
+@media (max-width:860px){.hero{grid-template-columns:1fr}.hphone{transform:none}.hchip{right:12%}}
+@media (prefers-reduced-motion:reduce){
+  .hfield .a,.hlink .a,.hmoney .a{animation:none;opacity:0}
+  .hfield .b,.hlink .b,.hmoney .b{animation:none;opacity:1}
+  .hsteps i,.hchip{animation:none}.hsteps i{background:var(--forest)}.hchip{opacity:1}
+}
+
+/* journey with screens */
+.jlayout{display:grid;grid-template-columns:minmax(0,1fr) 338px;gap:28px;align-items:start;margin:0 0 8px}
+.jphonewrap{position:sticky;top:64px}
+.jctl{margin:6px 0 0;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.playbtn{font:inherit;font-weight:700;font-size:15px;border-radius:999px;padding:9px 18px;cursor:pointer;border:1px solid var(--forest);background:var(--lime);color:var(--forest);margin-right:6px}
+.flow button.step{font-family:var(--body);text-align:left;color:var(--ink);cursor:pointer}
+.flow button.step:hover{border-color:var(--forest)}
+.flow button.step[aria-current="true"]{box-shadow:0 0 0 3px var(--forest)}
+.ph .bub{max-width:82%;padding:8px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.ph .bub.me{align-self:flex-end;background:var(--mint);border-color:var(--lime)}
+.ph .res{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:600}
+@media (max-width:860px){.jlayout{grid-template-columns:minmax(0,1fr)}.jphonewrap{position:static;justify-self:center}.jlayout>div:first-child{width:100%;min-width:0}}
+
+/* emotion curve */
+.curve{padding:14px 0 0 58px;overflow-x:auto;overflow-y:hidden;margin-bottom:6px}
+.cvin{position:relative;height:250px}
+.cvin svg{position:absolute;left:0;top:0;width:100%;height:150px;overflow:visible;animation:draw 1.3s ease-out both}
+@keyframes draw{from{clip-path:inset(-12px 100% -12px 0)}to{clip-path:inset(-12px -12px -12px 0)}}
+.ax{position:absolute;left:-54px;font-size:11px;color:var(--muted)}
+.cv{position:absolute;inset:0;display:flex}
+.cv .pt{flex:1;position:relative;height:100%;border:0;background:none;padding:0;cursor:pointer;font-family:var(--body);color:var(--ink);animation:pop .4s both;animation-delay:calc(var(--i) * 110ms)}
+.pt .dot{position:absolute;left:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:var(--card);border:2px solid var(--green);font:700 11px var(--body);display:flex;align-items:center;justify-content:center;color:var(--forest);transition:transform .2s,box-shadow .2s}
+.pt .lbl{position:absolute;left:3px;right:3px;top:166px;font-size:12px;line-height:1.25;font-weight:600;text-align:center}
+.pt.gap .dot{background:var(--warn);border-color:var(--badink)}
+.pt.ok .dot{background:var(--lime);border-color:var(--forest)}
+.pt:hover .dot{background:var(--mint)}
+.pt[aria-current="true"] .dot{box-shadow:0 0 0 4px rgba(22,51,0,.28);transform:scale(1.2)}
+.pt .gaptag{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--badink)}
+@media (prefers-reduced-motion:reduce){.cvin svg{animation:none}.cv .pt{animation:none}}
+
+.ph .apphead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.ph .av{width:36px;height:36px;border-radius:50%;background:#ECEFE8;border:1px solid #fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;color:#3A4236}
+.ph .earn{margin-left:auto;background:#B0E87E;color:var(--forest);font-weight:700;font-size:13px;border-radius:999px;padding:8px 12px;box-shadow:0 0 0 1px #A4E36F}
+.ph .more{background:#fff;color:#444;font-weight:700;font-size:13px;border-radius:999px;padding:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+.ph .locked.hasbtn{padding:5px 6px 5px 12px}
+.ph .lockbtn{width:30px;height:30px;border-radius:50%;border:0;background:var(--green);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;animation:lockpulse 2s infinite}
+.ph .lockbtn.on{animation:none;background:var(--forest)}
+.ph .lockbtn:hover{background:var(--forest)}
+.ph .banner.show{animation:slidein .25s ease-out both}
+@keyframes lockpulse{0%{box-shadow:0 0 0 0 rgba(47,87,17,.5)}70%,100%{box-shadow:0 0 0 9px rgba(47,87,17,0)}}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ph .lockbtn,.ph .banner.show{animation:none}}
+
+.byline{color:var(--lime);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.byline:hover{color:#fff}
+
+.byrow{margin-top:56px;display:flex;flex-direction:column;align-items:flex-start;gap:12px;font-size:16px}
+.byrow .tag{margin-top:0}
+
+/* llm section */
+.llm{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start;margin:4px 0 0}
+.chatcard{display:flex;flex-direction:column;gap:12px}
+.chatcard .k,.anode .k{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.cwin{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;height:400px;box-shadow:0 10px 26px rgba(22,51,0,.10)}
+.chead{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--forest);color:#fff}
+.chead b{display:block;font-family:var(--display);font-size:16px;line-height:1.1}
+.chead small{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mint);opacity:.9}
+.chead small::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime)}
+.av{width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--forest);display:grid;place-items:center;font-family:var(--display);font-weight:700;flex:none}
+.cbody{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;background:var(--paper)}
+.crow{display:flex;align-items:flex-end;gap:8px;animation:pop .3s both}
+.crow.me{justify-content:flex-end}
+.crow .av{width:26px;height:26px;font-size:12px}
+.cb{max-width:80%;padding:9px 13px;font-size:15px;line-height:1.4;background:var(--card);border:1px solid var(--line);border-radius:16px 16px 16px 4px;color:var(--ink)}
+.crow.me .cb{background:var(--forest);border-color:var(--forest);color:#fff;border-radius:16px 16px 4px 16px}
+.typing{display:inline-flex;gap:4px;padding:12px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.5;animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:.9}}
+.cinput{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line);background:var(--card)}
+.cinput span{flex:1;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--muted);background:var(--paper)}
+.cinput i{width:32px;height:32px;border-radius:50%;background:var(--lime);color:var(--forest);display:grid;place-items:center;font-style:normal;font-size:14px}
+@media (prefers-reduced-motion:reduce){.typing i{animation:none}}
+.outcome{margin-top:auto;background:var(--forest);color:var(--mint);border-radius:12px;padding:10px 14px;font-size:15px}
+.arch{display:flex;flex-direction:column;align-items:stretch}
+.anode{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;opacity:.55;transition:opacity .3s,border-color .3s,box-shadow .3s}
+.anode b{font-family:var(--display);font-size:18px;color:var(--forest)}
+.anode.on{opacity:1;border-color:var(--forest);box-shadow:0 0 0 3px rgba(159,232,112,.55)}
+.alink{height:22px;width:2px;background:var(--line);margin:0 auto;position:relative;transition:background .3s}
+.alink.on{background:var(--green)}
+.alink.on::after{content:"";position:absolute;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--green);animation:flowdown 1.2s linear infinite}
+.alink.dashed{background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+.alink.dashed.on{background:repeating-linear-gradient(var(--badink) 0 4px,transparent 4px 8px)}
+@keyframes flowdown{from{top:-4px;opacity:1}to{top:18px;opacity:0}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font-size:12.5px;font-weight:600;border-radius:999px;padding:4px 10px;border:1px solid var(--line);background:var(--paper);color:var(--muted);transition:all .25s}
+.chip.read.on{background:var(--mint);border-color:var(--green);color:var(--forest)}
+.chip.act.on{background:var(--warn);border-color:var(--warnline);color:#5A4300}
+.chip.no{text-decoration:line-through;text-decoration-color:rgba(122,31,16,.5)}
+.chip.no.on{background:var(--bad);border-color:var(--badline);color:var(--badink)}
+@media (max-width:860px){.llm{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.alink.on::after,.cb{animation:none}}
+
+.tile .own{display:block;margin-top:10px;font-size:12px;color:var(--muted)}
+
+@media (max-width:640px){
+  table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:auto}
+  table.stack tr:first-child{display:none}
+  table.stack tr{padding:12px 14px;border-top:1px solid var(--line)}
+  table.stack tr:nth-child(2){border-top:0}
+  table.stack td{border:0;padding:2px 0}
+  table.stack td:first-child,#measure table.stack td:first-child{width:auto;white-space:normal}
+  table.stack td[data-l]::before{content:attr(data-l);display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green);margin-top:8px}
+}
+footer{padding:36px 0 64px;color:var(--muted);font-size:14px}
+footer p{margin:0 0 8px;max-width:70ch}
+@media (max-width:860px){
+  .grid3,.grid2,.road{grid-template-columns:1fr}
+  .proto{grid-template-columns:minmax(0,1fr);justify-items:center}
+  .ctl{width:100%}
+  td:first-child{white-space:normal}
+  #measure td:first-child{width:32%}
+  table.stack td:first-child{width:auto}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.flow li{animation:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap hero">
+<div class="herotext">
+<p class="eyebrow">Product teardown · Support Experience</p>
+<h1>Wise - Country of Residence Change</h1>
+<p>What happens when a Wise customer moves to a new country, and how the app and Support could fix it.</p>
+<div class="byrow"><span>By <a class="byline" href="https://www.linkedin.com/in/namratapanchall" target="_blank" rel="noopener">Namrata Panchal</a></span><span class="tag">Independent concept. Not affiliated with Wise.</span></div>
+</div>
+<div class="heroart" role="img" aria-label="Animated phone screen: the country of residence changes from Japan to United Kingdom and the balance switches from yen to pounds.">
+<div class="hphone" aria-hidden="true">
+<div class="hbar">Personal details</div>
+<div class="hbody">
+<span class="hlabel">Country of residence</span>
+<div class="hfield"><span class="a">Japan</span><span class="b">United Kingdom</span></div>
+<div class="hlink"><span class="a">Moved recently? <u>Update your country</u></span><span class="b">Approved. Your app now follows the UK.</span></div>
+<div class="hmoney"><span class="a"><small>Japan · JPY</small><big>¥0</big></span><span class="b"><small>United Kingdom · GBP</small><big>£0.00</big></span></div>
+<div class="hsteps"><i></i><i></i><i></i></div>
+</div>
+</div>
+<span class="hchip c1" aria-hidden="true">JP → GB</span>
+</div>
+</div></header>
+
+<nav class="jump" aria-label="Sections"><div class="wrap">
+<a href="#problem">Problem</a><a href="#journey">Journey</a><a href="#hypotheses">Hypotheses</a><a href="#solution">Solution</a><a href="#prototype">Prototype</a><a href="#llm">LLM</a><a href="#measure">Metrics</a><a href="#questions">Open questions</a>
+</div></nav>
+
+<section class="glance" aria-label="At a glance"><div class="wrap"><div class="tiles">
+<div class="tile"><span class="k">The problem</span><b>Movers can’t update their country in the app, so they go to Support.</b></div>
+<div class="tile"><span class="k">The fix</span><b>A tappable lock, an in-app flow, and a handoff to Support when a check flags.</b></div>
+<div class="tile"><span class="k">First test</span><b>Tappable lock vs today: do region-change contacts fall? <a href="#measure">See metrics</a></b></div>
+</div></div></section>
+
+<main class="wrap">
+
+<section id="problem">
+<h2>The problem</h2>
+<p class="statement reveal">Customers who move country can’t update their country of residence in the app. Some likely leave. Those who stay have to go through Support, often more than once.</p>
+
+<div class="tiles">
+<div class="tile reveal" style="--d:0"><span class="k">Who</span><b>Wise customers who move country</b></div>
+<div class="tile reveal" style="--d:1"><span class="k">Goal</span><b>Change the country on their account</b></div>
+<div class="tile reveal bad" style="--d:2"><span class="k">Blocker</span><b>The field is greyed out</b></div>
+<div class="tile reveal bad" style="--d:3"><span class="k">Result</span><b>Help articles, emailed documents, Support</b></div>
+<div class="tile reveal bad" style="--d:4"><span class="k">After</span><b>App still shows the old currency</b></div>
+<div class="tile reveal" style="--d:5"><span class="k">Unknown</span><b>How many customers. Wise doesn’t publish it.</b></div>
+</div>
+
+<h3 class="sub">In their words</h3>
+<div class="quotes">
+<figure class="quote reveal" style="--d:0"><blockquote>“It’s taking ages. Followed up twice.”</blockquote><figcaption>r/wisebank · 1 week ago</figcaption></figure>
+<figure class="quote reveal" style="--d:1"><blockquote>“my account is restricted because I need to confirm my address”</blockquote><figcaption>r/wisebank · 7 months ago</figcaption></figure>
+</div>
+
+<h3 class="sub">What Wise says</h3>
+<div class="facts">
+<a class="fact reveal" style="--d:0" href="https://wise.com/help/articles/3xConsbhr7buWkQuqDEQ5V/how-do-i-verify-my-country-of-residence"><span class="k">Field greyed out</span><b>Contact Wise with a document from your new country.</b></a>
+<a class="fact reveal" style="--d:1" href="https://wise.com/help/articles/3umiLdiQoFLxh0xP36MEIO/how-do-i-update-my-country-of-residence"><span class="k">No change option shown</span><b>It isn’t available where you live yet.</b></a>
+<a class="fact reveal" style="--d:2" href="https://wise.com/help/articles/1e5Yyfl91yUaDNGkBNcEhw/why-is-my-account-restricted"><span class="k">Account restricted</span><b>Support can’t remove or speed up the review.</b></a>
+</div>
+
+<h3 class="sub">Where customers are lost</h3>
+<div class="grid2">
+<div class="card reveal" style="--d:0"><span class="pill">Measurable</span><h3 style="margin-top:8px">Contact, then give up</h3><p>They reach Support but never finish.</p></div>
+<div class="card reveal" style="--d:1"><span class="pill alt">Not measurable</span><h3 style="margin-top:8px">Leave without contacting</h3><p>They can’t find the way and move on.</p></div>
+</div>
+<p class="small">Evidence: public posts and Wise’s help pages.</p>
+</section>
+
+<section id="journey">
+<h2>The customer journey</h2>
+<div class="seg" role="group" aria-label="Journey view">
+<button type="button" id="jToday" aria-pressed="true">Today</button>
+<button type="button" id="jFix" aria-pressed="false">With the fix</button>
+</div>
+<div class="jlayout">
+<div>
+<div id="lanes"></div>
+<div class="jctl"><button type="button" class="playbtn" id="jplay">Play the journey</button><span class="small">Or tap any step.</span></div>
+</div>
+<div class="jphonewrap"><div class="ph" id="jphone"></div><p class="screenlabel" id="jlabel"></p><p class="small" style="margin:2px 0 0">Illustrative screens, not real Wise screens.</p></div>
+</div>
+<div class="grid3" style="margin-top:28px">
+<div class="card"><h3>Avoidable contact</h3><p>Customers can’t self-serve, so they contact Support.</p></div>
+<div class="card"><h3>A second round</h3><p>The country changes but the app doesn’t. They come back.</p></div>
+<div class="card"><h3>Lost trust</h3><p>Documents go by email, or customers give up quietly.</p></div>
+</div>
+</section>
+
+<section id="hypotheses">
+<h2>Five hypotheses</h2>
+<div class="tablewrap"><table class="stack">
+<tr><th>#</th><th>Hypothesis</th><th>First test</th></tr>
+<tr><td>H1</td><td>Customers don’t realise the field is locked on purpose. They think the app is broken.</td><td data-l="First test">Interview recent movers; read chat transcripts</td></tr>
+<tr><td>H2</td><td>Emailing documents lowers completion. Customers struggle to find the right email address, and trust is low when sending personal documents to a generic support address.</td><td data-l="First test">Funnel: documents requested to documents received; ask movers how they found the address</td></tr>
+<tr><td>H3</td><td>Customers accept a slower check if the app shows clear status.</td><td data-l="First test">Prototype test: status shown or not</td></tr>
+<tr><td>H4</td><td>Self-serve exists in some countries, but customers can’t tell whether it exists in theirs.</td><td data-l="First test">Entry-point analytics on the profile screen</td></tr>
+<tr><td>H5</td><td>After the change, parts of the app still follow the old country, like referral offers in yen. Customers can’t tell if the change is finished or still in progress, or whether they can use the app. So they go back to Support.</td><td data-l="First test">Repeat contacts after a change; contacts that mention the old currency or ask if the change is done</td></tr>
+</table></div>
+</section>
+
+<section id="solution">
+<h2>The solution, in phases</h2>
+<p class="lede">If I had an engineering team for three months, I’d fix the clarity problem first, then the process. Timings are my estimates.</p>
+<div class="road">
+<div class="card"><span class="pill">P0 · about a week</span><h3>Add a clear link</h3><p>Make the lock tappable. It reveals a “Moved recently?” link to the right help article.</p></div>
+<div class="card"><span class="pill">P1</span><h3>In-app flow</h3><p>New address, upload proof, see status. Checks run in the background.</p></div>
+<div class="card"><span class="pill">P2</span><h3>Switch the whole app</h3><p>Currency, display and content follow the new country.</p></div>
+<div class="card"><span class="pill">P3</span><h3>Assistant</h3><p>Guides customers and hands off to a person. Then more countries.</p></div>
+</div>
+<p class="small">Happy and unhappy paths are walked through in <a href="#journey">the customer journey</a> (switch to “With the fix”).</p>
+</section>
+
+<section id="prototype">
+<h2>Prototype</h2>
+<p class="lede">Tap through the screens. Use the controls to try different situations.</p>
+<div class="proto">
+<div>
+<div class="ph" id="phone" aria-live="polite"></div>
+<p class="screenlabel" id="screenlabel"></p>
+</div>
+<div class="ctl">
+<fieldset><legend>Country</legend>
+<label><input type="radio" name="region" value="app" checked> In-app change available</label>
+<label><input type="radio" name="region" value="none"> No in-app route</label></fieldset>
+<fieldset><legend>Network</legend>
+<label><input type="radio" name="network" value="normal" checked> Normal</label>
+<label><input type="radio" name="network" value="slow"> Slow</label>
+<label><input type="radio" name="network" value="offline"> No connection</label></fieldset>
+<fieldset><legend>File</legend>
+<label><input type="radio" name="file" value="ok" checked> Readable</label>
+<label><input type="radio" name="file" value="bad"> Can’t be read</label></fieldset>
+<fieldset><legend>Review result</legend>
+<label><input type="radio" name="review" value="approved" checked> Approved</label>
+<label><input type="radio" name="review" value="manual"> Flagged for manual check</label>
+<label><input type="radio" name="review" value="rejected"> Document rejected</label>
+<label><input type="radio" name="review" value="late"> Takes too long</label></fieldset>
+<div class="actions"><button type="button" class="primary" id="ff" disabled>Fast-forward the review</button><button type="button" id="restart">Restart</button></div>
+<p class="small" style="margin:12px 0 0">Set the situation before you reach the screen it affects.</p>
+</div>
+</div>
+</section>
+
+<section id="llm">
+<h2>How an LLM works with Wise’s systems</h2>
+<p class="lede">A proposed design. The assistant talks. Wise’s systems decide.</p>
+<div class="seg" role="group" aria-label="Scenario" id="llmseg">
+<button type="button" data-s="0" aria-pressed="true">Asks where</button>
+<button type="button" data-s="1" aria-pressed="false">Starts the change</button>
+<button type="button" data-s="2" aria-pressed="false">Check flagged</button>
+</div>
+<div class="llm">
+<div class="chatcard"><div class="cwin" role="group" aria-label="Example customer chat"><div class="chead"><span class="av" aria-hidden="true">A</span><div><b>Assistant</b><small>Example chat, not live</small></div></div><div class="cbody" id="llmchat" aria-live="polite"></div><div class="cinput" aria-hidden="true"><span>Type a message</span><i>➤</i></div></div><div class="outcome" id="llmout"></div></div>
+<div class="arch">
+<div class="anode" data-n="llm"><span class="k">Assistant (LLM)</span><b>Understands, explains, drafts</b></div>
+<div class="alink" data-n="l1" aria-hidden="true"></div>
+<div class="anode tools" data-n="tools"><span class="k">Tools it may call</span>
+<div class="chips">
+<span class="chip read" data-c="country">Read: current country</span>
+<span class="chip read" data-c="docs">Read: accepted documents</span>
+<span class="chip read" data-c="status">Read: verification status</span>
+<span class="chip read" data-c="route">Read: in-app change available?</span>
+<span class="chip act" data-c="start">After OK: start the change</span>
+<span class="chip act" data-c="case">After OK: create case summary</span>
+<span class="chip no" data-c="decide">Never: decide a result</span>
+<span class="chip no" data-c="approve">Never: approve documents</span>
+</div></div>
+<div class="alink" data-n="l2" aria-hidden="true"></div>
+<div class="anode" data-n="sys"><span class="k">Wise’s systems</span><b>Check, decide and record</b></div>
+<div class="alink dashed" data-n="l3" aria-hidden="true"></div>
+<div class="anode" data-n="sup"><span class="k">Support</span><b>Finishes by hand, with the case summary</b></div>
+</div>
+</div>
+<div class="grid2" style="margin-top:20px">
+<div class="card"><h3>Hands off when</h3><ul class="tight"><li>A check fails or is unclear</li><li>A risk flag is raised</li><li>The customer asks for a person</li><li>There’s no in-app route</li></ul></div>
+<div class="card"><h3>How I’d check it works</h3><ul class="tight"><li>Replay past chats offline first</li><li>Block any reply that states a verification result</li><li>Track hand-offs and second contacts</li></ul></div>
+</div>
+</section>
+
+<section id="measure">
+<h2>What to measure</h2>
+<div class="card" style="margin-bottom:20px"><h3>First test</h3>
+<ul class="tight">
+<li><b>Test:</b> today’s screen against a screen with the tappable lock and link</li>
+<li><b>Success:</b> fewer region-change contacts per 1,000 customers who open the screen</li>
+<li><b>Watch:</b> failed verifications, compliance flags, repeat contacts</li>
+<li><b>Catch:</b> few customers move each week, so check volumes before setting a sample size</li>
+</ul></div>
+<div class="tablewrap"><table class="stack">
+<tr><th>Metric</th><th>Why</th><th>Type</th></tr>
+<tr><td>Second-contact rate</td><td data-l="Why">Did the first answer work?</td><td data-l="Type"><span class="pill">Main</span></td></tr>
+<tr><td>Time from “I’ve moved” to the app matching the new country</td><td data-l="Why">The whole journey, not only the reply</td><td data-l="Type"><span class="pill">Main</span></td></tr>
+<tr><td>Completion from document request to country updated</td><td data-l="Why">Where people drop off</td><td data-l="Type"><span class="pill">Main</span></td></tr>
+<tr><td>Contacts about old currency or display after a change</td><td data-l="Why">Did the app switch too?</td><td data-l="Type"><span class="pill">Main</span></td></tr>
+<tr><td>Contacts per 1,000 customers about address or country</td><td data-l="Why">The volume the fix should cut</td><td data-l="Type"><span class="pill alt">Secondary</span></td></tr>
+<tr><td>Document rejection rate; compliance review failures</td><td data-l="Why">Must not get worse</td><td data-l="Type"><span class="pill alt">Guardrail</span></td></tr>
+</table></div>
+</section>
+
+<section id="questions">
+<h2>Open questions</h2>
+<div class="card" style="margin-bottom:32px"><ul class="tight">
+<li>Which countries have the in-app option, and which don’t?</li>
+<li>What does the app change today when the country changes, and what still needs Support?</li>
+<li>Why did the app keep showing yen? Is an update missing, or does it depend on balances held in the old currency?</li>
+<li>One Wise help page says it can’t accept documents by email. The greyed-out route says to contact Wise with a document. Which is it?</li>
+<li>Do customers really get a result within the 2 days Wise states?</li>
+<li>Is there a secure upload channel already used for identity checks that this flow could reuse?</li>
+</ul></div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+<p>Sources: Wise Help Centre, <a href="https://wise.com/help/articles/3umiLdiQoFLxh0xP36MEIO/how-do-i-update-my-country-of-residence">How do I update my country of residence?</a> and <a href="https://wise.com/help/articles/3xConsbhr7buWkQuqDEQ5V/how-do-i-verify-my-country-of-residence">How do I verify my country of residence?</a></p>
+<p>An independent product teardown by Namrata Panchal. Not affiliated with, or endorsed by, Wise.</p>
+</div></footer>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+
+  /* ---------- reveal on scroll ---------- */
+  var rv=document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+    rv.forEach(function(el){io.observe(el)});
+  }else{rv.forEach(function(el){el.classList.add('in')})}
+
+  /* ---------- LLM scenarios ---------- */
+  var SC=[
+    {chat:[['me','I moved to the UK. Where do I change my country?'],['ai','Your account is registered in Japan. Open Personal details, tap the green lock, then Update your country.']],nodes:['llm','tools','sys'],chips:['country','route'],links:['l1','l2'],out:'The customer self-serves. No tool changes anything.'},
+    {chat:[['me','Please start the change to the UK.'],['ai','I can start it. You’ll add your new address and a document. Shall I go ahead?'],['me','Yes'],['ai','Done. Your request is open. You can follow it on the status screen.']],nodes:['llm','tools','sys'],chips:['route','start'],links:['l1','l2'],out:'Started only after the customer said yes.'},
+    {chat:[['me','Why is my change taking so long?'],['ai','Your case needs a manual check, so Support will finish it. Here’s a summary you can copy.'],['ai','I can’t say how it will end. Support will decide.']],nodes:['llm','tools','sys','sup'],chips:['status','case','decide'],links:['l1','l2','l3'],out:'Support picks it up with the summary. The assistant never states a result.'}
+  ];
+  var llmChat=$('#llmchat'),llmOut=$('#llmout'),llmBtns=[].slice.call(document.querySelectorAll('#llmseg button'));
+  var llmTimers=[];
+  function llmShow(i){
+    var c=SC[i];
+    llmBtns.forEach(function(b,k){b.setAttribute('aria-pressed',String(k===i))});
+    llmTimers.forEach(clearTimeout);llmTimers=[];llmChat.innerHTML='';
+    var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches,t=0;
+    function add(m){var r=document.createElement('div');r.className='crow '+(m[0]==='me'?'me':'ai');r.innerHTML=(m[0]==='me'?'':'<span class="av" aria-hidden="true">A</span>')+'<div class="cb">'+m[1]+'</div>';llmChat.appendChild(r);llmChat.scrollTop=llmChat.scrollHeight}
+    c.chat.forEach(function(m){
+      if(reduce){add(m);return}
+      if(m[0]==='ai'){
+        llmTimers.push(setTimeout(function(){var r=document.createElement('div');r.className='crow ai typingrow';r.innerHTML='<span class="av" aria-hidden="true">A</span><div class="cb typing"><i></i><i></i><i></i></div>';llmChat.appendChild(r);llmChat.scrollTop=llmChat.scrollHeight},t));t+=700;
+        llmTimers.push(setTimeout(function(){var x=llmChat.querySelector('.typingrow');if(x)x.remove();add(m)},t));t+=400;
+      }else{llmTimers.push(setTimeout(function(){add(m)},t));t+=500}
+    });
+    llmOut.textContent=c.out;
+    document.querySelectorAll('.anode').forEach(function(n){n.classList.toggle('on',c.nodes.indexOf(n.dataset.n)>-1)});
+    document.querySelectorAll('.alink').forEach(function(n){n.classList.toggle('on',c.links.indexOf(n.dataset.n)>-1)});
+    document.querySelectorAll('.chip').forEach(function(n){n.classList.toggle('on',c.chips.indexOf(n.dataset.c)>-1)});
+  }
+  llmBtns.forEach(function(b,i){b.onclick=function(){llmShow(i)}});
+  llmShow(0);
+
+  /* ---------- journey ---------- */
+  /* step = [label, kind (1 gap, 2 ok), screen key, scroll to end, mood 0-100 (illustrative)] */
+  var today=[['Field is greyed out',0,'tLocked',0,40],['Doesn’t know where to find help',0,'tHelp',0,20],['Finds and reads help articles',0,'tArticle',0,35],['Contacts Support',0,'tChat',0,30],['Emails documents',0,'tEmail',0,12],['Country is changed',0,'tChanged',0,66],['App still shows yen',1,'tYen',0,8],['Contacts Support again',0,'tChat2',0,22]];
+  var fixHappy=[['Sees a green lock',0,'personalClosed',0,55],['Taps it: “Moved recently?” appears',0,'personalOpen',0,63],['Adds new address',0,'details',0,69],['Uploads proof in the app',0,'upload',0,75],['Sees status while checks run',0,'status',0,81],['Approved: whole app switches to the UK',2,'done',0,96]];
+  var fixUnhappy=[['A check flags the case',0,'manual',0,42],['Case summary ready to send',0,'manual',1,60],['Support finishes the check',0,'sent',0,74]];
+  function lane(title,steps,color){
+    var n=steps.length,pts=steps.map(function(s,i){return ((i+.5)/n*100).toFixed(2)+' '+(100-s[4])}),
+    h='<div class="lane"><h3>'+title+'</h3><div class="curve"><div class="cvin" style="width:'+Math.min(100,n*14)+'%;min-width:'+(n*68)+'px">'+
+    '<span class="ax" style="top:-4px">Fine</span><span class="ax" style="top:138px">Frustrated</span>'+
+    '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="50" x2="100" y2="50" stroke="#C9D6BE" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/><path d="M'+pts.join(' L')+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>'+
+    '<div class="cv">';
+    steps.forEach(function(s,i){
+      var c=s[1]===1?' gap':s[1]===2?' ok':'';
+      h+='<button type="button" class="step pt'+c+'" style="--i:'+i+'" data-screen="'+s[2]+'" data-scroll="'+(s[3]?1:0)+'" data-label="'+s[0]+'" aria-current="false"><span class="dot" style="top:'+((100-s[4])*1.5).toFixed(1)+'px">'+(i+1)+'</span><span class="lbl">'+(s[1]===1?'<span class="gaptag">Gap</span>':'')+s[0]+'</span></button>';
+    });
+    return h+'</div></div></div></div>';
+  }
+  var bt=$('#jToday'),bf=$('#jFix'),lanes=$('#lanes'),jphone=$('#jphone'),jlabel=$('#jlabel'),jplay=$('#jplay');
+  var jbtns=[],jtimer=null;
+  function jstop(){if(jtimer){clearInterval(jtimer);jtimer=null}jplay.textContent='Play the journey'}
+  function jselect(i){
+    jbtns.forEach(function(b,k){b.setAttribute('aria-current',String(k===i))});
+    var b=jbtns[i];if(!b)return;
+    jphone.innerHTML=screens[b.dataset.screen]().replace(/ (id|for)="[^"]*"/g,'');
+    if(b.dataset.scroll==='1'){var bd=jphone.querySelector('.ph-body');if(bd)bd.scrollTop=bd.scrollHeight}
+    jlabel.innerHTML='Step '+(i+1)+' of '+jbtns.length+': <b>'+b.dataset.label+'</b>';
+  }
+  function journey(fix){
+    jstop();
+    bt.setAttribute('aria-pressed',String(!fix));bf.setAttribute('aria-pressed',String(fix));
+    lanes.innerHTML=fix?lane('Happy path',fixHappy,'#2F5711')+lane('Unhappy path',fixUnhappy,'#B5651D'):lane('Today, where the field is locked',today,'#B5651D')+'<p class="small" style="margin:0">Mood is illustrative, not measured.</p>';
+    jbtns=[].slice.call(lanes.querySelectorAll('button.step'));
+    jselect(0);
+  }
+  lanes.addEventListener('click',function(e){var b=e.target.closest('button.step');if(!b)return;jstop();jselect(jbtns.indexOf(b))});
+  jphone.addEventListener('click',function(e){
+    if(e.target.closest('a,button'))e.preventDefault();
+    if(e.target.closest('[data-act="lock"]')){
+      var i=jbtns.findIndex(function(b){return b.getAttribute('aria-current')==='true'});
+      if(i<0)return;jstop();
+      var sc=jbtns[i].dataset.screen;
+      if(sc==='personalClosed')jselect(i+1);else if(sc==='personalOpen')jselect(i-1);
+    }
+  });
+  jplay.onclick=function(){
+    if(jtimer){jstop();return}
+    var i=0;jselect(0);jplay.textContent='Pause';
+    jtimer=setInterval(function(){i++;if(i>=jbtns.length){jstop();return}jselect(i)},2600);
+  };
+  bt.onclick=function(){journey(false)};bf.onclick=function(){journey(true)};
+
+  /* ---------- prototype ---------- */
+  var S={region:'app',network:'normal',file:'ok',review:'approved'};
+  var cur='personal',hist=[],timers=[],switched=false,lockOpen=false;
+  var phone=$('#phone'),label=$('#screenlabel'),ff=$('#ff');
+  var names={personal:'Personal details',unavailable:'No in-app route',details:'Where you live now',docs:'Accepted documents',upload:'Upload proof',uploading:'Uploading',failed:'Upload failed',filebad:'File can’t be read',saved:'Progress saved',status:'Checking your documents',done:'App switched to the UK',home:'Home in GBP',homeReview:'Home while in review',manual:'Extra verification needed',rejected:'Document rejected',delayed:'Review is late',support:'Contact support',sent:'Message sent'};
+  var unhappy={unavailable:1,failed:1,filebad:1,saved:1,manual:1,rejected:1,delayed:1};
+  var BACK='<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#163300" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+  var LOCK='<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A5A40" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  function head(t,back){return '<div class="ph-head">'+(back?'<button type="button" class="ph-back" data-act="back" aria-label="Back">'+BACK+'</button>':'')+'<span>'+t+'</span></div>'}
+  function body(h){return '<div class="ph-body">'+h+'</div>'}
+  function b1(t,a){return '<button type="button" class="b1" '+a+'>'+t+'</button>'}
+  function b2(t,a){return '<button type="button" class="b2" '+a+'>'+t+'</button>'}
+  function b3(t,a){return '<button type="button" class="b3" '+a+'>'+t+'</button>'}
+  function ul(a){return '<ul>'+a.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'}
+  function box(t,x,k){return '<div class="box '+(k||'')+'"><b>'+t+'</b>'+x+'</div>'}
+  function file(sub){return '<div class="file"><b>proof-of-address.pdf</b><div class="small">'+sub+'</div></div>'}
+  function bar(p){return '<div class="bar" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+p+'"><div id="bar" style="width:'+p+'%"></div></div>'}
+  var SUMMARY='Country change request. Case ref: CC-0000 (example). From: Japan. To: United Kingdom. Step: manual check. Please complete my country change.';
+
+  var LOCKW='<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var UNLOCK='<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.4-2"/></svg>';
+  function personalS(mode){
+    var lock=mode==='plain'?LOCK:'<button type="button" class="lockbtn'+(mode==='open'?' on':'')+'" data-act="lock" aria-expanded="'+(mode==='open')+'" aria-label="Moved recently? '+(mode==='open'?'Hide':'Show')+' the country update">'+(mode==='open'?UNLOCK:LOCKW)+'</button>';
+    return head('Personal details')+body(
+      '<div><label>Country of residence</label><div class="locked'+(mode==='plain'?'':' hasbtn')+'">Japan '+lock+'</div></div>'+
+      (mode==='open'?'<button type="button" class="banner show" data-act="moved">Moved recently? <u>Update your country</u></button>':'')+
+      '<div><label>Legal first and middle name(s)</label><div class="locked">Alex</div></div>'+
+      '<div><label>Legal last name(s)</label><div class="locked">Example</div></div>'+
+      '<div><label for="pn">Preferred name (optional)</label><input id="pn" type="text"></div>')}
+  var screens={
+    personal:function(){return personalS(lockOpen?'open':'closed')},
+    personalClosed:function(){return personalS('closed')},
+    personalOpen:function(){return personalS('open')},
+    tLocked:function(){return personalS('plain')},
+    tHelp:function(){return head('Help')+body(
+      '<div><label>Search</label><input value="change country of residence" readonly></div>'+
+      '<div class="res">How do I update my country of residence?</div><div class="res">How do I verify my country of residence?</div><div class="res">How do I update my address?</div>'+
+      '<p class="small" style="margin:0">Which one is right for me?</p>')},
+    tArticle:function(){return head('Help')+body(
+      '<h4>If the field is greyed out</h4>'+ul(['You need Wise’s help to change it','Contact us with a document from your new country'])+
+      '<p class="small" style="margin:0">Paraphrased from Wise’s help page.</p><div class="grow"></div>'+b1('Contact us',''))},
+    tChat:function(){return head('Contact us')+body(
+      '<div class="bub me">I moved to the UK. My country field is greyed out.</div>'+
+      '<div class="bub">Please email us a proof of address from your new country.</div>'+
+      '<div class="grow"></div>'+box('Outside the app','You are asked to continue by email.','warn'))},
+    tEmail:function(){return head('Email')+body(
+      '<div><label>To</label><div class="locked">Wise Support</div></div><div><label>Subject</label><div class="locked">Country change</div></div>'+
+      file('Attached from your phone')+
+      box('Sent by email','Your document leaves the app, by email.','warn')+'<div class="grow"></div>'+b1('Send',''))},
+    tChanged:function(){return head('Inbox')+body(
+      '<h4>Your country has been updated</h4>'+
+      box('From Support','<div class="chg"><span>Country</span><b>Japan → United Kingdom</b></div>')+
+      '<p class="small" style="margin:0">An email. Nothing changes in the app yet.</p>')},
+    tYen:function(){return '<div class="apphead"><span class="av">NP</span><span class="earn">Earn ¥11,000</span><span class="more">Do more +</span></div>'+body(
+      box('The country changed, the app didn’t','Your balance and offers still show yen.','bad'))},
+    tChat2:function(){return head('Contact us')+body(
+      '<div class="bub me">My app still shows yen.</div><div class="bub">Thanks, we’ll look into it.</div>'+
+      '<div class="grow"></div>'+box('A second round','Same issue, another conversation.','warn'))},
+    unavailable:function(){return head('Update your country',1)+body(
+      '<h4>Not available in the app yet</h4>'+ul(['Support can change it for you','We’ll send them your request'])+
+      box('Have this ready','A document issued in your new country, with your new address.')+'<div class="grow"></div>'+
+      b1('Contact support','data-go="support"')+b3('Which documents can I use?','data-go="docs"'))},
+    details:function(){return head('Update your country',1)+body(
+      '<span class="step">Step 1 of 3</span><h4>Where do you live now?</h4>'+
+      '<div><label for="nc">New country</label><input id="nc" value="United Kingdom" readonly></div>'+
+      '<div><label for="st">Street and number</label><input id="st" placeholder="Your new address"></div>'+
+      '<div><label for="ci">City</label><input id="ci" placeholder="City"></div>'+
+      '<div><label for="po">Postcode</label><input id="po" placeholder="Postcode"></div>'+
+      '<div class="grow"></div>'+b1('Continue','data-go="upload"')+b3('Which documents can I use?','data-go="docs"'))},
+    docs:function(){return head('Accepted documents',1)+body(
+      '<h4>Proof of your new address</h4>'+
+      box('Examples Wise lists','<ul><li>Photo driving licence with address</li><li>Yearly council tax bill</li><li>Bank account opening letter</li></ul>')+
+      box('Not accepted','<ul><li>Photos of a screen</li><li>Issued to a business</li><li>Wise statements</li><li>A document already used</li></ul>','bad')+
+      '<p class="small" style="margin:0">Accepted documents depend on your country.</p><div class="grow"></div>'+b1('Got it','data-act="back"'))},
+    upload:function(){return head('Update your country',1)+body(
+      '<span class="step">Step 2 of 3</span><h4>Upload proof of address</h4>'+file('Added from your phone')+
+      '<p style="margin:0">Sent securely in the app. No email needed.</p>'+
+      box('Your account is suspended during the review','<ul><li>Wise says this can take up to 2 days</li><li>You can follow progress in the app</li></ul>','warn')+
+      '<div class="grow"></div>'+b1('Submit for review','data-go="uploading"'))},
+    uploading:function(){return head('Update your country')+body(
+      '<span class="step">Step 2 of 3</span><h4>Uploading your document</h4>'+file('Sent securely in the app')+bar(0)+
+      '<p style="margin:0" id="pct">0% sent</p>'+
+      '<div id="slow" hidden>'+box('Taking longer than usual','<ul><li>Your connection looks slow</li><li>Keep the app open, or finish later</li><li>Nothing is lost</li></ul>','warn')+
+      '<div style="height:12px"></div>'+b1('Keep waiting','data-act="wait"')+b3('Save and finish later','data-go="saved"')+'</div>'+
+      '<div class="grow"></div>')},
+    failed:function(){return head('Update your country',1)+body(
+      '<span class="step">Step 2 of 3</span><h4>The upload didn’t go through</h4>'+
+      box('No internet connection','<ul><li>Nothing was sent</li><li>Your account isn’t suspended</li></ul>','bad')+
+      '<p class="small" style="margin:0">Change the network in the controls, then try again.</p><div class="grow"></div>'+
+      b1('Try again','data-act="retry"')+b2('Save and finish later','data-go="saved"')+b3('Contact support','data-go="support"'))},
+    filebad:function(){return head('Update your country',1)+body(
+      '<span class="step">Step 2 of 3</span><h4>We can’t read this file</h4>'+
+      box('Check the file','<ul><li>Is it blurry or cut off?</li><li>Do all four corners show?</li><li>Is the file type accepted?</li></ul>','bad')+
+      '<div class="grow"></div>'+b1('Choose another file','data-act="fixfile"')+b3('Contact support','data-go="support"'))},
+    saved:function(){return head('Update your country')+body(
+      '<h4>Progress saved</h4>'+ul(['Nothing was sent','Your account works as normal','Finish later from Personal details'])+'<div class="grow"></div>'+b1('Back to personal details','data-act="restart"'))},
+    status:function(){return head('Update your country')+body(
+      '<span class="step">Step 3 of 3</span><h4>We’re checking your documents</h4>'+
+      '<p style="margin:0">Up to 2 days. We’ll tell you when it’s done.</p>'+
+      '<ul class="tl"><li><i class="d"></i>Request submitted</li><li><i class="n"></i>Checking your documents</li><li><i></i>Your app switches to the United Kingdom</li></ul>'+
+      box('Account suspended during the review','It becomes active again when the check is done.','warn')+'<div class="grow"></div>'+
+      b1('Back to home','data-act="home"')+b3('Contact support','data-go="support"'))},
+    manual:function(){return head('Update your country')+body(
+      '<h4>Extra verification needed</h4>'+
+      box('We couldn’t finish the check automatically','Support will finish it. Your request stays open until then.','warn')+
+      '<ol><li>Check your case summary</li><li>Send it to Support</li><li>We finish the check</li></ol>'+
+      '<div><label for="sum">Your case summary</label><textarea id="sum" rows="4" readonly>'+SUMMARY+'</textarea></div>'+
+      '<div class="grow"></div>'+b1('Send to Support in the app','data-go="support"')+b2('Copy summary','data-act="copy"')+
+      '<p class="small" style="margin:0;text-align:center" id="copied" hidden>Copied</p>'+
+      '<a class="b3" href="mailto:?subject=Country%20change%20request&body='+encodeURIComponent(SUMMARY)+'">Or open an email draft</a>')},
+    rejected:function(){return head('Update your country')+body(
+      '<h4>We couldn’t verify this document</h4>'+box('Example reason','The address doesn’t match the one you entered.','bad')+
+      ul(['Upload a different document','Your request isn’t complete until then'])+'<div class="grow"></div>'+
+      b1('Upload a new document','data-go="upload"')+b2('Accepted documents','data-go="docs"')+b3('Contact support','data-go="support"'))},
+    delayed:function(){return head('Update your country')+body(
+      '<h4>Taking longer than expected</h4>'+ul(['We said up to 2 days','No need to upload again','Your request is safe'])+
+      box('Your account is still suspended','It stays that way until the review ends.','warn')+'<div class="grow"></div>'+
+      b1('Contact support','data-go="support"')+b3('Back to home','data-act="home"'))},
+    done:function(){return head('Update your country')+body(
+      '<h4 style="margin-top:20px">Your app now follows the United Kingdom</h4><p style="margin:0">Approved. Your account is active again.</p>'+
+      box('What changed','<div class="chg"><span>Country</span><b>Japan → United Kingdom</b></div><div class="chg"><span>Currency</span><b>¥ JPY → £ GBP</b></div><div class="chg"><span>Home screen and help</span><b>Updated for the UK</b></div>')+
+      '<div class="grow"></div>'+b1('Go to home','data-act="home"')+b3('Something still looks wrong?','data-go="support"'))},
+    home:function(){return head('Home')+body(
+      '<div class="money"><span>United Kingdom · GBP</span><big>£0.00</big>GBP balance</div>'+box('Your app now follows the UK','Your account is active again.')+
+      '<div class="grow"></div>'+b3('Start again','data-act="restart"'))},
+    homeReview:function(){return head('Home')+body(
+      '<div class="money"><span>Japan · JPY</span><big>¥0</big>JPY balance</div>'+box('Country change in review','Your account is suspended during the review.','warn')+
+      b3('See the status','data-act="tostatus"')+b3('Contact support','data-go="support"'))},
+    support:function(){return head('Contact support',1)+body(
+      '<h4>Tell us what’s wrong</h4>'+
+      box('Already shared with Support','<ul><li>Country change: Japan → United Kingdom</li><li>Step: where you are now</li><li>Your uploaded document</li></ul><div style="margin-top:6px">No need to explain again.</div>')+
+      '<div><label for="msg">What do you need help with?</label><textarea id="msg" rows="3" placeholder="For example: my app still shows yen"></textarea></div>'+
+      '<div class="grow"></div>'+b1('Send message','data-go="sent"'))},
+    sent:function(){return head('Contact support')+body(
+      '<h4 style="margin-top:12px">Message sent</h4>'+box('What happens next','<ul><li>An agent reads your request</li><li>We reply in the app</li><li>Updates show on your status screen</li></ul>')+
+      '<div class="grow"></div>'+b1('Back to home','data-act="home"'))}
+  };
+
+  function stop(){timers.forEach(function(t){clearTimeout(t);clearInterval(t)});timers=[]}
+  function render(){
+    phone.innerHTML=screens[cur]();
+    label.innerHTML='Screen: <b>'+names[cur]+'</b>'+(unhappy[cur]?' <span class="pill">Unhappy path</span>':'');
+    ff.disabled=cur!=='status';
+    if(cur==='uploading')run();
+  }
+  function go(n){stop();hist.push(cur);cur=n;render()}
+  function replace(n){stop();cur=n;render()}
+  function restart(){stop();hist=[];cur='personal';switched=false;lockOpen=false;render()}
+  function set(v){var b=$('#bar');if(!b)return;b.style.width=v+'%';b.parentNode.setAttribute('aria-valuenow',v);$('#pct').textContent=v+'% sent'}
+  function finish(){replace(S.file==='bad'?'filebad':'status')}
+  function climb(from,cap,step,ms,after){
+    var p=from;var iv=setInterval(function(){p=Math.min(cap,p+step);set(p);if(p>=cap){clearInterval(iv);after()}},ms);timers.push(iv);
+  }
+  function run(){
+    if(S.network==='offline'){timers.push(setTimeout(function(){replace('failed')},1200));return}
+    if(S.network==='slow'){climb(0,35,1,90,function(){var s=$('#slow');if(s)s.hidden=false});return}
+    climb(0,100,4,70,function(){timers.push(setTimeout(finish,300))});
+  }
+  function result(){
+    if(S.review==='approved'){switched=true;replace('done')}
+    else if(S.review==='manual')replace('manual');
+    else if(S.review==='rejected')replace('rejected');
+    else replace('delayed');
+  }
+  function act(a){
+    if(a==='back'){stop();cur=hist.pop()||'personal';render()}
+    else if(a==='lock'){lockOpen=!lockOpen;render();var lb=phone.querySelector('[data-act="lock"]');if(lb)lb.focus()}
+    else if(a==='moved'){go(S.region==='app'?'details':'unavailable')}
+    else if(a==='wait'){var s=$('#slow');if(s)s.hidden=true;climb(35,100,5,80,function(){timers.push(setTimeout(finish,300))})}
+    else if(a==='retry'){replace('uploading')}
+    else if(a==='fixfile'){S.file='ok';document.querySelector('input[name=file][value=ok]').checked=true;go('upload')}
+    else if(a==='home'){go(switched?'home':'homeReview')}
+    else if(a==='tostatus'){go('status')}
+    else if(a==='restart'){restart()}
+    else if(a==='copy'){
+      var t=$('#sum'),m=$('#copied');
+      try{navigator.clipboard.writeText(SUMMARY).then(function(){m.hidden=false},function(){t.select();m.textContent='Select and copy the text above';m.hidden=false})}
+      catch(e){t.select();m.textContent='Select and copy the text above';m.hidden=false}
+    }
+  }
+  phone.addEventListener('click',function(e){
+    var el=e.target.closest('[data-go],[data-act]');if(!el)return;
+    if(el.dataset.go)go(el.dataset.go);else act(el.dataset.act);
+  });
+  ff.onclick=result;
+  $('#restart').onclick=restart;
+  ['region','network','file','review'].forEach(function(k){
+    document.querySelectorAll('input[name='+k+']').forEach(function(r){r.addEventListener('change',function(){S[k]=r.value})});
+  });
+  render();
+  journey(false);
+})();
+</script>
+</body>
+</html>
